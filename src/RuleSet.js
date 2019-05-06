@@ -9,7 +9,9 @@ class RuleSet {
   constructor() {
     this.actions = [];
     this.premises = [];
-    this.premisesByHash = {};
+    // I don't need to use premisesByHash; in my case several heroes can have the same premise 
+    // ( with a different value in the closure which won't be caught by this approach )
+    //this.premisesByHash = {};
     this.nextActionId = uniqueid('a');
     this.nextPremiseId = uniqueid('p');
     this.actionsByActivationGroup = {}; // hash
@@ -35,18 +37,18 @@ class RuleSet {
     walker(rule);
     // premises
     [...whens].forEach((when, index) => {
-      const hash = md5(when.toString()); // is function already introduced by other rule?
-      let premise = this.premisesByHash[hash];
-      if (!premise) { // create new premise
-        premise = new Premise({
+      //const hash = md5(when.toString()); // is function already introduced by other rule?
+      //let premise = this.premisesByHash[hash];
+      //if (!premise) { // create new premise
+        let premise = new Premise({
           ...rule,
           id: this.nextPremiseId(),
           name: `${rule.name} / ${index}`,
           when,
         });
-        this.premisesByHash[hash] = premise;
+        //this.premisesByHash[hash] = premise;
         this.premises.push(premise);
-      }
+      //}
       action.add(premise); // action ->> premises
       premise.add(action); // premise ->> actions
     });
