@@ -4,6 +4,7 @@ const Delegator = require('./Delegator');
 const WorkingMemory = require('./WorkingMemory');
 const ConflictResolution = require('./ConflictResolution');
 const observe = require('./observe');
+const RuleError = require('./RuleError');
 
 class Rools {
   constructor({ logging } = {}) {
@@ -13,7 +14,7 @@ class Rools {
   }
 
   async register(rules) {
-    rules.forEach(rule => this.rules.register(rule));
+    rules.forEach((rule) => this.rules.register(rule));
   }
 
   async evaluate(facts, { strategy } = {}) {
@@ -25,7 +26,7 @@ class Rools {
     });
     const conflictResolution = new ConflictResolution({ strategy, logger: this.logger });
     const delegator = new Delegator();
-    const proxy = observe(facts, segment => delegator.delegate(segment));
+    const proxy = observe(facts, (segment) => delegator.delegate(segment));
     // match-resolve-act cycle
     let pass = 0; /* eslint-disable no-await-in-loop */
     for (; pass < this.maxPasses; pass += 1) {
@@ -100,7 +101,7 @@ class Rools {
       await action.fire(facts); // >>> fire action!
     } catch (error) { // re-throw error!
       this.logger.error({ message: 'error in action (then)', rule: action.name, error });
-      throw new Error(`error in action (then): ${action.name}`, error);
+      throw new RuleError(`error in action (then): ${action.name}`, error);
     } finally {
       delegator.unset();
     }
